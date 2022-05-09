@@ -1,0 +1,115 @@
+---
+title: "A2 - Analise de Dados Meteorologicos"
+output:
+  html_document:
+    toc: true
+    toc_float: 
+      collapsed: false
+      smooth_scroll: true
+    toc_depth: 3
+  html_notebook: default
+---
+
+## Alunos:
+
+- Paulo José Marques ([Github](https://github.com/PauloJMarques), [Linkedln](https://www.linkedin.com/in/paulojosemarques/));
+
+- Felipe Stelet ([Linkedln](https://www.linkedin.com/in/felipe-stelet-bb5ab5213/)).
+
+# Objetivos do Trabalho:
+
+- Relacionar as informações do Instituto Nacional de Meteorologia e buscar uma análise das chuvas nos últimos anos.
+
+- Site da base de dados: https://portal.inmet.gov.br
+
+
+# Próximos passos para a A2:
+
+- Análise dos dados, utilizar alguma medida estatística para prever possíveis chuvas de grande porte;
+
+- Acessar a API do INMET para possibilitar o download de todos os estados e períodos possíveis da base de dados, é importante comentar que sem essa API para coletar os dados de forma automatica não é possível fazer os gráficos das regiões do país;
+
+- Utilizar a biblioteca do google para plotar gráficos de mapa para representar os níveis de chuva das regiões do país.
+
+# Pacotes Utilizados:
+
+- Plotar graficos;
+
+- Acessar dados do excel;
+
+- No futuro pacote para leitura de dados na API.
+
+```{r}
+library(readxl)
+library(tidyverse)
+library(lubridate)
+```
+
+# Acessando os Dados:
+
+```{r}
+df = read_excel(path = "df_planilha.xlsx", skip= 8)
+```
+
+# Visualizacao dos Dados:
+
+```{r}
+df
+```
+
+## Arrumando os Dados:
+
+Dados que buscamos para as análises:
+
+- Total de Precipitação (mm);
+
+- Temperatura Mínima Média (C°);
+
+- Velocidade Média do Vento (m/s).
+
+### Dados Diários:
+
+```{r}
+df_dias = df %>%
+  group_by(Data) %>% 
+  summarise(Total_Precipitacao_mm=sum(`PRECIPITA«√O TOTAL, HOR¡RIO (mm)`),Temperatura_Minima_Media_C=mean(`TEMPERATURA M¡XIMA NA HORA ANT. (AUT) (∞C)`), Velocidade_Vento_Media_ms=mean(`VENTO, VELOCIDADE HORARIA (m/s)`))
+df_dias
+```
+#### Gráfico:
+
+```{r}
+par(mfrow=c(1,2))
+barplot(df_dias$Total_Precipitacao_mm, col= 'red')
+mtext(text = 'Precipitação', side=3, line=1)
+barplot(df_dias$Velocidade_Vento_Media_ms, col = 'blue')
+mtext(text = 'Velocidade do Vento', side=3, line=1)
+```
+
+### Dados Mensais:
+
+```{r}
+df_mensal = df
+df_mensal$Data = paste0(year(df_mensal$Data),'-', month(df_mensal$Data))
+
+df_mensal = df_mensal %>%
+  group_by(Data) %>% 
+  summarise(Total_Precipitacao_mm=sum(`PRECIPITA«√O TOTAL, HOR¡RIO (mm)`),Temperatura_Minima_Media_C=mean(`TEMPERATURA M¡XIMA NA HORA ANT. (AUT) (∞C)`), Velocidade_Vento_Media_ms=mean(`VENTO, VELOCIDADE HORARIA (m/s)`))
+
+df_mensal
+```
+
+#### Gráfico:
+
+```{r}
+par(mfrow=c(1,2))
+barplot(df_mensal$Total_Precipitacao_mm, col= 'red')
+mtext(text = 'Precipitação', side=3, line=1)
+barplot(df_mensal$Velocidade_Vento_Media_ms, col = 'blue')
+mtext(text = 'Velocidade do Vento', side=3, line=1)
+```
+
+## Conclusão Atual:
+
+Podemos ver que a relação da velocidade do vento com a chuva no grafico diario possui uma relação forte, que mais tarde podemos mostrar atraves de um grafico de correlação. Por outro lado, é possivel ver que a relação entre ventos e precipitação náo é tão relevante no grafico mensal.
+
+
